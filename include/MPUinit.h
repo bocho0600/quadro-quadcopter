@@ -16,7 +16,11 @@ Roll - rotation around X-axis
 Pitch - rotation around Y-axis
 Yaw - rotation around Z-axis (counter-clockwise is positive)
 */
+
 extern float RateRoll, RatePitch, RateYaw; // Gyroscope data
+extern int RateCalibrationNumber;                                       // Number of calibration data
+extern float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw; // Calibration data
+extern float RateRoll, RatePitch, RateYaw;                                  // Gyroscope data
 
 //Gyroscope functions
 void GyroInit();
@@ -24,5 +28,7 @@ void MPU9250_LOWPASS(); // Activate the low-pass filter
 void GyroResponse();    // Read the gyroscope data
 void GyroConfiguration();
 void PowerManagementMPU(); // Wake up the MPU9250
+void MPUCalibration();     // Calibrate the gyroscope
+void RateCorrection();     // Correct the gyroscope data by calibration data
 
 #endif

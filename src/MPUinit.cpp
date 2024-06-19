@@ -15,7 +15,9 @@ Pitch - rotation around Y-axis
 Yaw - rotation around Z-axis (counter-clockwise is positive)
 */
 
-float RateRoll, RatePitch, RateYaw; // Gyroscope data
+int RateCalibrationNumber = 0;                                       // Number of calibration data
+float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw; // Calibration data
+float RateRoll, RatePitch, RateYaw;                                  // Gyroscope data
 
 void MPU9250_LOWPASS() // Activate Low-pass filter to limit the rate of noise
 {
@@ -50,15 +52,38 @@ void GyroResponse()
   }
 }
 
-void GyroConfiguration() {
+void GyroConfiguration()
+{
   MPU9250_LOWPASS(); // Activate the low-pass filter
   GyroInit();        // Initialize the gyroscope
   GyroResponse();    // Read the gyroscope data
 }
 
-void PowerManagementMPU() {
+void PowerManagementMPU()
+{
   Wire.beginTransmission(MPU9250_ADDRESS);
   Wire.write(PWR_MGMT_1); // Access register 6B (107) - Power Management 1
   Wire.write(0x00);       // Set the power management to 0 to wake up the MPU9250
   Wire.endTransmission();
+}
+
+void MPUCalibration() // Let the ByPo stable in the first 2 seconds to measure the average value
+{
+  for (RateCalibrationNumber = 0; RateCalibrationNumber < 2000; RateCalibrationNumber++)
+  {
+    GyroConfiguration();
+    RateCalibrationRoll += RateRoll;
+    RateCalibrationPitch += RatePitch;
+    RateCalibrationYaw += RateYaw;
+    delay(1);
+  }
+  RateCalibrationRoll /= 2000;
+  RateCalibrationPitch /= 2000;
+  RateCalibrationYaw /= 2000;
+}
+
+void RateCorrection(){
+  RateRoll -= RateCalibrationRoll;
+  RatePitch -= RateCalibrationPitch;
+  RateYaw -= RateCalibrationYaw;
 }
