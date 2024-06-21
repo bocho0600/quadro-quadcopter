@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 #include <stdint.h>
+#include "MPUinit.h"
 
 #define MPU9250_ADDRESS 0x68 // Address of MPU9250 0b01101000 - 104
 #define WHO_AM_I 0x75        // Register to read the device ID 0b01110101
@@ -14,7 +15,7 @@ Roll - rotation around X-axis
 Pitch - rotation around Y-axis
 Yaw - rotation around Z-axis (counter-clockwise is positive)
 */
-
+State state = CALIBRATION;
 int RateCalibrationNumber = 0;                                       // Number of calibration data
 float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw; // Calibration data
 float RateRoll, RatePitch, RateYaw;                                  // Gyroscope data
@@ -80,10 +81,34 @@ void MPUCalibration() // Let the ByPo stable in the first 2 seconds to measure t
   RateCalibrationRoll /= 2000;
   RateCalibrationPitch /= 2000;
   RateCalibrationYaw /= 2000;
+  state = READY;
 }
 
-void RateCorrection(){
+void RateCorrection()
+{
   RateRoll -= RateCalibrationRoll;
   RatePitch -= RateCalibrationPitch;
   RateYaw -= RateCalibrationYaw;
+}
+void GyroRead()
+{
+  GyroConfiguration();
+  RateCorrection();
+}
+void MPU_setup()
+{
+  Wire.begin();
+  Wire.setClock(400000); // Set the I2C clock to 400kHz
+  PowerManagementMPU();  // Wake up the MPU9250
+  MPUCalibration();      // Calibrate the gyroscope, let the ByPo stable in the first 2 seconds to measure the average value
+}
+
+void GyroPrint()
+{
+  Serial.print(" X: ");
+  Serial.print(RateRoll);
+  Serial.print(" Y: ");
+  Serial.print(RatePitch);
+  Serial.print(" Z: ");
+  Serial.println(RateYaw);
 }
