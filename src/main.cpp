@@ -9,13 +9,14 @@ Contact:
 #include <stdint.h>
 #include "MPUinit.h"
 #include "pwm.h"
+#include "ControlSystem.h"
 
 void setup()
 {
   Serial.begin(115200);
-  delay(250);            // Wait for the MPU9250 to power up
-  MPU_setup();           // Setup the MPU , calibrate the gyroscope, let the ByPo stable in the first 2 seconds to measure the average value
-  pwm_init();            // Initialize PWM for motors and buzzer
+  delay(250);  // Wait for the MPU9250 to power up
+  MPU_setup(); // Setup the MPU , calibrate the gyroscope, let the ByPo stable in the first 2 seconds to measure the average value
+  pwm_init();  // Initialize PWM for motors and buzzer
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
@@ -30,9 +31,10 @@ void loop()
     state = RUN;
     break;
   case RUN:
-    GyroRead();       // Read the gyroscope data
     Serial.println(); // reset the line
+    GyroRead();       // Read the gyroscope data
     GyroPrint();      // Print the gyroscope data
+
     if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2))
     {
       digitalWrite(LED_BUILTIN, HIGH);
