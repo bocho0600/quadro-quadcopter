@@ -29,6 +29,13 @@ void motor_control(uint8_t speed1, uint8_t speed2, uint8_t speed3, uint8_t speed
       speed2 = constrain(speed2, 0, 255);
       speed3 = constrain(speed3, 0, 255);
       speed4 = constrain(speed4, 0, 255);
+      Serial.print(" Speed1: ");
+      Serial.print(speed1);
+      Serial.print(" Speed2: ");
+      Serial.print(speed2);
+      Serial.print(" Speed3: ");
+      Serial.print(speed3);
+      Serial.print(" Speed4: ");
       ledcWrite(1, speed1);
       ledcWrite(2, speed2);
       ledcWrite(3, speed3);

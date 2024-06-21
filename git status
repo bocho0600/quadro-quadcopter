@@ -1,0 +1,17 @@
+[33mcommit 527ee876203642ab9ad31d2dddf1874ce90c8229[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: Kelvin Le <134352794+bocho0600@users.noreply.github.com>
+Date:   Fri Jun 21 23:33:26 2024 +1000
+
+    GyroScope installation with buzzer
+
+[33mcommit fde296357199906c4eb7586c085464624d457c38[m
+Author: unknown <nguyenleminh1002@gmail.com>
+Date:   Wed Jun 19 13:02:17 2024 +1000
+
+    full code for MPU9250 configuration
+
+[33mcommit a4a264b896a63e1407f400b69b2be15e553767e9[m[33m ([m[1;31morigin/code[m[33m)[m
+Author: unknown <nguyenleminh1002@gmail.com>
+Date:   Tue Jun 18 22:52:46 2024 +1000
+
+    Drone code
