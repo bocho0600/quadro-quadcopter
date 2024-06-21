@@ -22,13 +22,22 @@ extern int RateCalibrationNumber;                                       // Numbe
 extern float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw; // Calibration data
 extern float RateRoll, RatePitch, RateYaw;                                  // Gyroscope data
 
+typedef enum {
+  CALIBRATION,
+  READY, 
+  RUN,
+  EMERGENCY_STOP
+} State;
+extern State state;
+
 //Gyroscope functions
 void GyroInit();
 void MPU9250_LOWPASS(); // Activate the low-pass filter
 void GyroResponse();    // Read the gyroscope data
-void GyroConfiguration();
 void PowerManagementMPU(); // Wake up the MPU9250
 void MPUCalibration();     // Calibrate the gyroscope
 void RateCorrection();     // Correct the gyroscope data by calibration data
-
+void GyroRead();           // Read the gyroscope data
+void MPU_setup();          // Setup the MPU9250
+void GyroPrint();          // Print the gyroscope data
 #endif
