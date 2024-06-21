@@ -7,7 +7,7 @@ Contact:
 #include <Wire.h>
 #include <Arduino.h>
 #include <stdint.h>
-#include "MPUinit.h"
+#include "GyroInit.h"
 #include "pwm.h"
 #include "ControlSystem.h"
 
