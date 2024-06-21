@@ -1,5 +1,5 @@
-#ifndef MPUINIT_H
-#define MPUINIT_H
+#ifndef GYROINIT_H
+#define GYROINIT_H
 #include <Wire.h>
 #include <Arduino.h>
 #include <stdint.h>

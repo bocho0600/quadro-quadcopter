@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 #include <stdint.h>
-#include "MPUinit.h"
+#include "GyroInit.h"
 
 #define MPU9250_ADDRESS 0x68 // Address of MPU9250 0b01101000 - 104
 #define WHO_AM_I 0x75        // Register to read the device ID 0b01110101
