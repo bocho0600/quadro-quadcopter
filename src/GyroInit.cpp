@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include "GyroInit.h"
-
+#include "AccelInit.h"
 #define MPU9250_ADDRESS 0x68 // Address of MPU9250 0b01101000 - 104
 #define WHO_AM_I 0x75        // Register to read the device ID 0b01110101
 #define PWR_MGMT_1 0x6B      // Register to write to power management 0b01101011 - 107
@@ -47,9 +47,9 @@ void GyroResponse()
     int16_t GyroX = Wire.read() << 8 | Wire.read(); // Read the X-axis gyroscope data
     int16_t GyroY = Wire.read() << 8 | Wire.read(); // Read the Y-axis gyroscope data
     int16_t GyroZ = Wire.read() << 8 | Wire.read(); // Read the Z-axis gyroscope data
-    RateRoll = GyroX / 65.5;                        // Convert the data to degrees per second from 65.5 LSB/s
-    RatePitch = GyroY / 65.5;
-    RateYaw = GyroZ / 65.5;
+    RateRoll = (float)GyroX / 65.5;                        // Convert the data to degrees per second from 65.5 LSB/s
+    RatePitch = (float)GyroY / 65.5;
+    RateYaw = (float)GyroZ / 65.5;
   }
 }
 

@@ -11,10 +11,10 @@ void pwm_init()
       ledcSetup(0, 3000, 8);
       ledcAttachPin(BUZZER_PIN, 0);
 
-      // Motor setup on channels 1-4, 5000 Hz, 8-bit resolution
+      // Motor setup on channels 1-4, 250 Hz, 12-bit resolution
       for (int i = 1; i <= 4; i++)
       {
-            ledcSetup(i, 5000, 8);
+            ledcSetup(i, 250, 12);  // 250 Hz, 12-bit resolution
       }
       ledcAttachPin(MOTOR1, 1);
       ledcAttachPin(MOTOR2, 2);
