@@ -10,13 +10,14 @@ Contact:
 #include "GyroInit.h"
 #include "pwm.h"
 #include "ControlSystem.h"
-
+#include "AccelInit.h"
 void setup()
 {
   Serial.begin(115200);
   delay(250);  // Wait for the MPU9250 to power up
   MPU_setup(); // Setup the MPU , calibrate the gyroscope, let the ByPo stable in the first 2 seconds to measure the average value
   pwm_init();  // Initialize PWM for motors and buzzer
+
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
@@ -33,8 +34,11 @@ void loop()
   case RUN:
     Serial.println(); // reset the line
     GyroRead();       // Read the gyroscope data
-    GyroPrint();      // Print the gyroscope data
-
+    AccelRead();      // Read the accelerometer data
+    // GyroPrint();      // Print the gyroscope data
+    //AccelPrint(2); // Print the accelerometer data
+    KalmanFilter(); // Kalman filter for the accelerometer data
+    PredictedAnglePrint();
     if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2))
     {
       digitalWrite(LED_BUILTIN, HIGH);
@@ -46,5 +50,6 @@ void loop()
       // buzzing(0);
     }
     break;
+    delay(50);
   }
 }
