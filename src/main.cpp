@@ -39,6 +39,8 @@ void loop()
     //AccelPrint(2); // Print the accelerometer data
     KalmanFilter(); // Kalman filter for the accelerometer data
     PredictedAnglePrint();
+
+  
     if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2))
     {
       digitalWrite(LED_BUILTIN, HIGH);
