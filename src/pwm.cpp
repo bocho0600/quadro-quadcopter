@@ -53,8 +53,10 @@ void buzzing(uint8_t type)
             for (int i = 0; i < 2; i++)
             {
                   ledcWrite(0, 200); // Turn on buzzer
+                  digitalWrite(LED_BUILTIN, HIGH);
                   delay(100);        // Wait
                   ledcWrite(0, 0);   // Turn off buzzer
+                  digitalWrite(LED_BUILTIN, LOW);
                   delay(100);        // Wait
             }
       }
