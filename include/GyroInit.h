@@ -26,7 +26,7 @@ typedef enum {
   CALIBRATION,
   READY, 
   RUN,
-  EMERGENCY_STOP
+  EMERGENCY
 } State;
 extern State state;
 
