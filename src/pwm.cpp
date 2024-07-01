@@ -27,10 +27,10 @@ void pwm_init()
 // Function to control motor speed
 void motor_control(int speed1, int speed2, int speed3, int speed4)
 {
-      speed1 = map(speed1, 0, 4000, 0, 4096);
-      speed2 = map(speed2, 0, 4000, 0, 4096);
-      speed3 = map(speed3, 0, 4000, 0, 4096);
-      speed4 = map(speed4, 0, 4000, 0, 4096);
+      // speed1 = map(speed1, 0, 4000, 0, 4096);
+      // speed2 = map(speed2, 0, 4000, 0, 4096);
+      // speed3 = map(speed3, 0, 4000, 0, 4096);
+      // speed4 = map(speed4, 0, 4000, 0, 4096);
       speed1 = constrain(speed1, 0, 4096);
       speed2 = constrain(speed2, 0, 4096);
       speed3 = constrain(speed3, 0, 4096);
@@ -88,7 +88,7 @@ void buzzing(uint8_t type)
             while (1)
             {
                   buttonState = digitalRead(BUTTON_PIN); // read button state
-                  Serial.println(buttonState);
+                  //Serial.println(buttonState);
                   ledcSetup(0, 2000, 8);
                   ledcWrite(0, 200); // Turn on buzzer
                   digitalWrite(LED1, HIGH);

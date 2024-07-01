@@ -4,7 +4,7 @@
 #include "GyroInit.h"
 #include "AccelInit.h"
 #include "pwm.h"
-#include "ControlSystem.h"
+#include "AngleInit.h"
 
 /* The value range of Roll Pitch Yaw is from -500 to 500 */
 float KalmanAngleRoll = 0, KalmanUncertaintyAngleRoll = 4; // 2*2 = 4
