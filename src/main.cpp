@@ -9,9 +9,10 @@ Contact:
 #include <stdint.h>
 #include "GyroInit.h"
 #include "pwm.h"
-#include "ControlSystem.h"
+#include "AngleInit.h"
 #include "AccelInit.h"
-
+#include "PIDcontrol.h"
+uint32_t LoopTimer = 0;
 void setup()
 {
   Serial.begin(115200);
