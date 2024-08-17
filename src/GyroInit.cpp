@@ -81,7 +81,6 @@ void MPUCalibration() // Let the ByPo stable in the first 2 seconds to measure t
   RateCalibrationRoll /= 2000;
   RateCalibrationPitch /= 2000;
   RateCalibrationYaw /= 2000;
-  state = READY;
 }
 
 void RateCorrection()
