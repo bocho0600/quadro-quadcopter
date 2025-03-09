@@ -14,6 +14,7 @@ Contact:
 #include "PIDcontrol.h"
 
 uint32_t LoopTimer = 0;
+
 void setup()
 {
   Serial.begin(115200);
@@ -25,6 +26,7 @@ void setup()
   pinMode(LED2, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 }
+
 void ParametersRead()
 {
   Serial.println(); // reset the line
@@ -64,11 +66,19 @@ void loop()
 
     break;
   case RUN:
-    
+
     // GyroPrint();      // Print the gyroscope data
     // AccelPrint(2); // Print the accelerometer data
     PredictedAnglePrint();
     motor_control(3000, 3000, 3000, 3000); // 50% speed
+    if (pb_falling)
+    {
+      buzzing(5);
+      digitalWrite(LED1, LOW);  // Turn off RED LED
+      digitalWrite(LED2, HIGH); // Turn on Blue LED
+      motor_control(1000, 1000, 1000, 1000);
+      state = EMERGENCY;
+    }
     break;
   case EMERGENCY:
     motor_control(2000, 2000, 2000, 2000); // 50% speed
