@@ -46,7 +46,7 @@ void loop()
   {
     digitalWrite(LED_BUILTIN, LOW);
   }
-  Serial.print(pb_falling);
+  // Serial.print(pb_falling);
   switch (state)
   {
   case CALIBRATION:
