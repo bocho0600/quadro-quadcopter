@@ -14,10 +14,14 @@ Contact:
 #include "PIDcontrol.h"
 
 uint32_t LoopTimer = 0;
+// Constants
+#define RXD2 16  // Serial2 RX (connects to Pi TX)
+#define TXD2 17  // Serial2 TX (connects to Pi RX)
 
 void setup()
 {
-  Serial.begin(115200);
+  //Serial.begin(115200);
+  Serial2.begin(230400, SERIAL_8N1, RXD2, TXD2); // UART for Raspberry Pi communication
   delay(250);  // Wait for the MPU9250 to power up
   MPU_setup(); // Setup the MPU , calibrate the gyroscope, let the ByPo stable in the first 2 seconds to measure the average value
   pwm_init();  // Initialize PWM for motors and buzzer
@@ -29,7 +33,7 @@ void setup()
 
 void ParametersRead()
 {
-  Serial.println(); // reset the line
+  //Serial.println(); // reset the line
   GyroRead();       // Read the gyroscope data
   AccelRead();      // Read the accelerometer data
   KalmanFilter();   // Kalman filter for the accelerometer data
@@ -69,7 +73,9 @@ void loop()
 
     // GyroPrint();      // Print the gyroscope data
     // AccelPrint(2); // Print the accelerometer data
-    PredictedAnglePrint();
+    //PredictedAnglePrint();
+    Serial2.println("<TEL," + String(KalmanAngleRoll) + "," + String(KalmanAnglePitch) + ">");
+
     motor_control(3000, 3000, 3000, 3000); // 50% speed
     if (pb_falling)
     {
