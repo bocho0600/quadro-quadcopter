@@ -20,7 +20,7 @@ uint32_t LoopTimer = 0;
 
 void setup()
 {
-  //Serial.begin(115200);
+  Serial.begin(230400);
   Serial2.begin(230400, SERIAL_8N1, RXD2, TXD2); // UART for Raspberry Pi communication
   delay(250);  // Wait for the MPU9250 to power up
   MPU_setup(); // Setup the MPU , calibrate the gyroscope, let the ByPo stable in the first 2 seconds to measure the average value
@@ -38,8 +38,21 @@ void ParametersRead()
   AccelRead();      // Read the accelerometer data
   KalmanFilter();   // Kalman filter for the accelerometer data
 }
+
+void readPiData() {
+
+    if (Serial2.available()) {
+        String piData = Serial2.readStringUntil('>'); // Read until newline
+        Serial.println(piData); // Print to Serial Monitor
+        // TODO: Parse piData as needed
+    } 
+}
+
+
 void loop()
 {
+  Serial2.println("<TEL," + String(KalmanAngleRoll) + "," + String(KalmanAnglePitch) + ">");
+  readPiData(); // <-- Add this line
   ButtonCheck();
   ParametersRead();
   if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2))
@@ -74,7 +87,7 @@ void loop()
     // GyroPrint();      // Print the gyroscope data
     // AccelPrint(2); // Print the accelerometer data
     //PredictedAnglePrint();
-    Serial2.println("<TEL," + String(KalmanAngleRoll) + "," + String(KalmanAnglePitch) + ">");
+    
 
     motor_control(3000, 3000, 3000, 3000); // 50% speed
     if (pb_falling)
