@@ -15,7 +15,7 @@ extern bool buttonState;
 extern bool pb_falling;
 extern bool pb_rising;
 void pwm_init();
-void motor_control(int spped1, int speed2, int speed3, int speed4);
+void motor_control(float percent1, float percent2, float percent3, float percent4);
 void buzzing(uint8_t type);
 void ButtonCheck();
 #endif

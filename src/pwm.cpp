@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include "GyroInit.h"
 #include "pwm.h"
-#include <ESP32Servo.h>
 
 bool buttonState = 0;
 bool pb_falling = 0;
@@ -34,36 +33,55 @@ const int ESC_PIN1 = 5;
 const int ESC_PIN2 = 2;
 const int ESC_PIN3 = 3;
 const int ESC_PIN4 = 4;
-Servo esc1, esc2, esc3, esc4;
 
-void pwm_init()
-{
-  esc1.attach(ESC_PIN1);
-  esc2.attach(ESC_PIN2);
-  esc3.attach(ESC_PIN3);
-  esc4.attach(ESC_PIN4);
 
+void pwm_init() {
+      // Set up the buzzer pin
+      pinMode(0, OUTPUT);
+      //ledcSetup(0, 3000, 8); // Buzzer on pin 18, 3000Hz, 8-bit resolution
+  // Example setup: 50Hz, 16-bit resolution
+  ledcSetup(5, 50, 16);  // Channel 5 → Motor 1
+  ledcAttachPin(ESC_PIN1, 5);
+
+  ledcSetup(2, 50, 16);  // Channel 2 → Motor 2
+  ledcAttachPin(ESC_PIN2, 2);
+
+  ledcSetup(3, 50, 16);  // Channel 3 → Motor 3
+  ledcAttachPin(ESC_PIN3, 3);
+
+  ledcSetup(4, 50, 16);  // Channel 4 → Motor 4
+  ledcAttachPin(ESC_PIN4, 4);
 }
 
 // Function to control motor speed
-void motor_control(int percent1, int percent2, int percent3, int percent4) {
-  // Constrain percent inputs to 0-100%
-  percent1 = constrain(percent1, 0, 100);
-  percent2 = constrain(percent2, 0, 100);
-  percent3 = constrain(percent3, 0, 100);
-  percent4 = constrain(percent4, 0, 100);
 
-  // Map percent to pulse width in microseconds (1000–2000us)
-  int pwm1 = map(percent1, 0, 100, 1000, 2000);
-  int pwm2 = map(percent2, 0, 100, 1000, 2000);
-  int pwm3 = map(percent3, 0, 100, 1000, 2000);
-  int pwm4 = map(percent4, 0, 100, 1000, 2000);
+void motor_control(float percent1, float percent2, float percent3, float percent4)
+{
+    // Constrain input to 0–100%
+    percent1 = constrain(percent1, 0, 100);
+    percent2 = constrain(percent2, 0, 100);
+    percent3 = constrain(percent3, 0, 100);
+    percent4 = constrain(percent4, 0, 100);
 
-  // Send PWM signals to ESCs
-  esc1.writeMicroseconds(pwm1);
-  esc2.writeMicroseconds(pwm2);
-  esc3.writeMicroseconds(pwm3);
-  esc4.writeMicroseconds(pwm4);
+    // Map percent to microseconds (1000–2000us)
+    int pwm1_us = map(percent1, 0, 100, 1000, 2000);
+    int pwm2_us = map(percent2, 0, 100, 1000, 2000);
+    int pwm3_us = map(percent3, 0, 100, 1000, 2000);
+    int pwm4_us = map(percent4, 0, 100, 1000, 2000);
+
+    // For 16-bit resolution at 50Hz: max duty = 65535, period = 20000us
+    // Duty = (pulse_us / period_us) * max_duty
+    int max_duty = 65535; 
+    int period_us = 20000;
+    int duty1 = (pwm1_us * max_duty) / period_us;
+    int duty2 = (pwm2_us * max_duty) / period_us;
+    int duty3 = (pwm3_us * max_duty) / period_us;
+    int duty4 = (pwm4_us * max_duty) / period_us;
+
+    ledcWrite(5, duty1);
+    ledcWrite(2, duty2);
+    ledcWrite(3, duty3);
+    ledcWrite(4, duty4);
 }
 
 // Function to control buzzer
@@ -73,7 +91,7 @@ void buzzing(uint8_t type)
       if (type == 1)
       {
             // Pattern 1: Short beeps
-            ledcSetup(0, 3000, 8);
+            ledcSetup(0, 3000, 8); //
             for (int i = 0; i < 2; i++)
             {
                   ledcWrite(0, 255 >> 1); // Turn on buzzer
@@ -89,7 +107,7 @@ void buzzing(uint8_t type)
             // Pattern 2: Continuous buzzing
             if (type != prev_type)
             {
-                  ledcSetup(0, 2500, 8);
+                  ledcSetup(0, 2500, 8); // pin 18, 2500Hz, 8-bit resolution
             }
 
             ledcWrite(0, 200); // Turn on buzzer

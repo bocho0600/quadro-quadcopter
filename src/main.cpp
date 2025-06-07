@@ -88,7 +88,7 @@ void loop()
       buzzing(5);
       digitalWrite(LED2, LOW);  // Turn off RED LED
       digitalWrite(LED1, HIGH); // Turn on Blue LED
-      motor_control(1000, 1000, 1000, 1000);
+      //motor_control(1000, 1000, 1000, 1000);
       state = RUN;
     }
 
@@ -100,18 +100,18 @@ void loop()
     //PredictedAnglePrint();
     
 
-    motor_control(3000, 3000, 3000, 3000); // 50% speed
+    motor_control(50, 50, 50, 50);  // explicit float literals
     if (pb_falling)
     {
       buzzing(5);
       digitalWrite(LED1, LOW);  // Turn off RED LED
       digitalWrite(LED2, HIGH); // Turn on Blue LED
-      motor_control(1000, 1000, 1000, 1000);
+     // motor_control(1000, 1000, 1000, 1000);
       state = EMERGENCY;
     }
     break;
   case EMERGENCY:
-    motor_control(2000, 2000, 2000, 2000); // 50% speed
+    //motor_control(2000, 2000, 2000, 2000); // 50% speed
     buzzing(4);
     break;
     delay(1);
