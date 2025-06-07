@@ -39,19 +39,30 @@ void ParametersRead()
   KalmanFilter();   // Kalman filter for the accelerometer data
 }
 
-void readPiData() {
+String uartBuffer = "";
 
-    if (Serial2.available()) {
-        String piData = Serial2.readStringUntil('>'); // Read until newline
-        Serial.println(piData); // Print to Serial Monitor
-        // TODO: Parse piData as needed
-    } 
+void readPiData() {
+  while (Serial2.available()) {
+    char c = Serial2.read();
+
+    if (c == '<') {
+      uartBuffer = "";  // Start of new message
+      uartBuffer += c;
+    } else if (c == '>') {
+      uartBuffer += c;
+      Serial.println(uartBuffer);  // Print entire message
+      uartBuffer = "";  // Clear for next message
+    } else {
+      uartBuffer += c;
+    }
+  }
 }
+
 
 
 void loop()
 {
-  Serial2.println("<TEL," + String(KalmanAngleRoll) + "," + String(KalmanAnglePitch) + ">");
+  Serial2.print("<TEL," + String(KalmanAngleRoll, 2) + "," + String(KalmanAnglePitch, 2) + ">");
   readPiData(); // <-- Add this line
   ButtonCheck();
   ParametersRead();

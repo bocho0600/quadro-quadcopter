@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "GyroInit.h"
 #include "pwm.h"
+#include <ESP32Servo.h>
+
 bool buttonState = 0;
 bool pb_falling = 0;
 bool pb_rising = 0;
@@ -25,44 +27,43 @@ void ButtonCheck()
 const int freq = 50;       // Frequency in Hz for the ESC signal
 const int pwmChannel = 0;  // PWM channel (0-15)
 const int resolution = 12; // PWM resolution
+
+
+// Define your ESC control pins here
+const int ESC_PIN1 = 5;
+const int ESC_PIN2 = 2;
+const int ESC_PIN3 = 3;
+const int ESC_PIN4 = 4;
+Servo esc1, esc2, esc3, esc4;
+
 void pwm_init()
 {
-      // Buzzer setup on channel 0, 3000 Hz, 8-bit resolution
-      ledcSetup(0, 3000, 8);
-      ledcAttachPin(BUZZER_PIN, 0);
-      // Motor setup on channels 1-4, 250 Hz, 12-bit resolution
-      ledcSetup(2, freq, 16); // 250 Hz, 12-bit resolution
-      ledcSetup(3, freq, 16); // 250 Hz, 12-bit resolution
-      ledcSetup(4, freq, 16); // 250 Hz, 12-bit resolution
-      ledcSetup(5, freq, 16); // 250 Hz, 12-bit resolution
-      ledcAttachPin(MOTOR1, 5);
-      ledcAttachPin(MOTOR2, 2);
-      ledcAttachPin(MOTOR3, 3);
-      ledcAttachPin(MOTOR4, 4);
+  esc1.attach(ESC_PIN1);
+  esc2.attach(ESC_PIN2);
+  esc3.attach(ESC_PIN3);
+  esc4.attach(ESC_PIN4);
+
 }
 
 // Function to control motor speed
-void motor_control(int speed1, int speed2, int speed3, int speed4)
-{
-      speed1 = map(speed1, 1000, 2000, 3277, 6554);
-      speed2 = map(speed2, 1000, 2000, 3277, 6554);
-      speed3 = map(speed3, 1000, 2000, 3277, 6554);
-      speed4 = map(speed4, 1000, 2000, 3277, 6554);
-      // speed1 = constrain(speed1, 0, 4096); //
-      // speed2 = constrain(speed2, 0, 4096);
-      // speed3 = constrain(speed3, 0, 4096);
-      // speed4 = constrain(speed4, 0, 4096);
-      // Serial.print(" Speed1: ");
-      // Serial.print(speed1);
-      // Serial.print(" Speed2: ");
-      // Serial.print(speed2);
-      // Serial.print(" Speed3: ");
-      // Serial.print(speed3);
-      // Serial.print(" Speed4: ");
-      ledcWrite(5, speed1);
-      ledcWrite(2, speed2);
-      ledcWrite(3, speed3);
-      ledcWrite(4, speed4); // Write the speed to the motor by setting the duty cycle of PWM
+void motor_control(int percent1, int percent2, int percent3, int percent4) {
+  // Constrain percent inputs to 0-100%
+  percent1 = constrain(percent1, 0, 100);
+  percent2 = constrain(percent2, 0, 100);
+  percent3 = constrain(percent3, 0, 100);
+  percent4 = constrain(percent4, 0, 100);
+
+  // Map percent to pulse width in microseconds (1000–2000us)
+  int pwm1 = map(percent1, 0, 100, 1000, 2000);
+  int pwm2 = map(percent2, 0, 100, 1000, 2000);
+  int pwm3 = map(percent3, 0, 100, 1000, 2000);
+  int pwm4 = map(percent4, 0, 100, 1000, 2000);
+
+  // Send PWM signals to ESCs
+  esc1.writeMicroseconds(pwm1);
+  esc2.writeMicroseconds(pwm2);
+  esc3.writeMicroseconds(pwm3);
+  esc4.writeMicroseconds(pwm4);
 }
 
 // Function to control buzzer
