@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "GyroInit.h"
 #include "pwm.h"
+#include <ESP32Servo.h>
 
 bool buttonState = 0;
 bool pb_falling = 0;
@@ -22,66 +23,89 @@ void ButtonCheck()
             ledcWrite(0, 0); // Turn off buzzer
       }
 }
-// Initialize PWM for motors and buzzer
-const int freq = 50;       // Frequency in Hz for the ESC signal
-const int pwmChannel = 0;  // PWM channel (0-15)
-const int resolution = 12; // PWM resolution
-
 
 // Define your ESC control pins here
-const int ESC_PIN1 = 5;
-const int ESC_PIN2 = 2;
-const int ESC_PIN3 = 3;
-const int ESC_PIN4 = 4;
-
-
-void pwm_init() {
+const int ESC_PIN1 = MOTOR1;
+const int ESC_PIN2 = MOTOR2;
+const int ESC_PIN3 = MOTOR3;
+const int ESC_PIN4 = MOTOR4;
+Servo esc1, esc2, esc3, esc4;
+ 
+void pwm_init()
+{
       // Set up the buzzer pin
-      pinMode(0, OUTPUT);
-      //ledcSetup(0, 3000, 8); // Buzzer on pin 18, 3000Hz, 8-bit resolution
-  // Example setup: 50Hz, 16-bit resolution
-  ledcSetup(5, 50, 16);  // Channel 5 → Motor 1
-  ledcAttachPin(ESC_PIN1, 5);
+      // Attach ESCs to pins
+      
+      MotorConnect(true); // Initially disconnect motors
 
-  ledcSetup(2, 50, 16);  // Channel 2 → Motor 2
-  ledcAttachPin(ESC_PIN2, 2);
-
-  ledcSetup(3, 50, 16);  // Channel 3 → Motor 3
-  ledcAttachPin(ESC_PIN3, 3);
-
-  ledcSetup(4, 50, 16);  // Channel 4 → Motor 4
-  ledcAttachPin(ESC_PIN4, 4);
 }
-
-// Function to control motor speed
 
 void motor_control(float percent1, float percent2, float percent3, float percent4)
 {
-    // Constrain input to 0–100%
-    percent1 = constrain(percent1, 0, 100);
-    percent2 = constrain(percent2, 0, 100);
-    percent3 = constrain(percent3, 0, 100);
-    percent4 = constrain(percent4, 0, 100);
+      // Constrain percent inputs to 0-100%
+      percent1 = constrain(percent1, 0, 100);
+      percent2 = constrain(percent2, 0, 100);
+      percent3 = constrain(percent3, 0, 100);
+      percent4 = constrain(percent4, 0, 100);
 
-    // Map percent to microseconds (1000–2000us)
-    int pwm1_us = map(percent1, 0, 100, 1000, 2000);
-    int pwm2_us = map(percent2, 0, 100, 1000, 2000);
-    int pwm3_us = map(percent3, 0, 100, 1000, 2000);
-    int pwm4_us = map(percent4, 0, 100, 1000, 2000);
+      // Map percent to pulse width in microseconds (1000–2000us)
+      int pwm1 = map(percent1, 0, 100, 1000, 2000);
+      int pwm2 = map(percent2, 0, 100, 1000, 2000);
+      int pwm3 = map(percent3, 0, 100, 1000, 2000);
+      int pwm4 = map(percent4, 0, 100, 1000, 2000);
 
-    // For 16-bit resolution at 50Hz: max duty = 65535, period = 20000us
-    // Duty = (pulse_us / period_us) * max_duty
-    int max_duty = 65535; 
-    int period_us = 20000;
-    int duty1 = (pwm1_us * max_duty) / period_us;
-    int duty2 = (pwm2_us * max_duty) / period_us;
-    int duty3 = (pwm3_us * max_duty) / period_us;
-    int duty4 = (pwm4_us * max_duty) / period_us;
+      // Send PWM signals to ESCs
+      esc1.writeMicroseconds(pwm1);
+      esc2.writeMicroseconds(pwm2);
+      esc3.writeMicroseconds(pwm3);
+      esc4.writeMicroseconds(pwm4);
+}
 
-    ledcWrite(5, duty1);
-    ledcWrite(2, duty2);
-    ledcWrite(3, duty3);
-    ledcWrite(4, duty4);
+void MotorConnect(bool activate)
+{
+      if (activate)
+      {
+            esc1.attach(ESC_PIN1);
+            esc2.attach(ESC_PIN2);
+            esc3.attach(ESC_PIN3);
+            esc4.attach(ESC_PIN4);
+            Serial.println("Motors armed.");
+      }
+      else
+      {
+            esc1.detach();
+            esc2.detach();
+            esc3.detach();
+            esc4.detach();
+            Serial.println("Motors disarmed.");
+      }
+      // Attach ESCs to start sending signals
+}
+
+void MotorWrite(bool armed, float percent1, float percent2, float percent3, float percent4)
+{     
+      static bool prev_armed = armed; // Store previous armed state
+      if (armed != prev_armed) // if the armed state has changed
+      {
+            if (armed)
+            {
+                  MotorConnect(true); // Connect motors when armed
+            }
+            else
+            {
+                  MotorConnect(false); // Disconnect motors when disarmed
+            }
+      }
+      prev_armed = armed; // Store previous armed state
+      if (!armed)
+      {
+            percent1 = 0; // Stop motors if not armed
+            percent2 = 0;
+            percent3 = 0;
+            percent4 = 0;
+      }
+
+      motor_control(percent1, percent2, percent3, percent4); // Control motors based on input percentages
 }
 
 // Function to control buzzer

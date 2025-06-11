@@ -39,6 +39,13 @@ void ParametersRead()
   KalmanFilter();   // Kalman filter for the accelerometer data
 }
 
+bool motor_armed = false;
+float motor1_percent = 0;
+float motor2_percent = 0;
+float motor3_percent = 0;
+float motor4_percent = 0;
+
+
 String uartBuffer = "";
 
 void readPiData() {
@@ -50,7 +57,26 @@ void readPiData() {
       uartBuffer += c;
     } else if (c == '>') {
       uartBuffer += c;
-      Serial.println(uartBuffer);  // Print entire message
+      // Serial.println(uartBuffer);  // Print entire message
+
+      // Parse if message starts with <MOT,
+      if (uartBuffer.startsWith("<MOT,")) {
+        // Remove <MOT, and >
+        String data = uartBuffer.substring(5, uartBuffer.length() - 1);
+        int idx1 = data.indexOf(',');
+        int idx2 = data.indexOf(',', idx1 + 1);
+        int idx3 = data.indexOf(',', idx2 + 1);
+        int idx4 = data.indexOf(',', idx3 + 1);
+
+        if (idx1 > 0 && idx2 > idx1 && idx3 > idx2 && idx4 > idx3) {
+          motor_armed    = (data.substring(0, idx1).toInt() != 0); // true if not zero
+          motor1_percent = data.substring(idx1 + 1, idx2).toFloat();
+          motor2_percent = data.substring(idx2 + 1, idx3).toFloat();
+          motor3_percent = data.substring(idx3 + 1, idx4).toFloat();
+          motor4_percent = data.substring(idx4 + 1).toFloat();
+        }
+      }
+
       uartBuffer = "";  // Clear for next message
     } else {
       uartBuffer += c;
@@ -59,13 +85,15 @@ void readPiData() {
 }
 
 
-
 void loop()
 {
   Serial2.print("<TEL," + String(KalmanAngleRoll, 2) + "," + String(KalmanAnglePitch, 2) + ">");
   readPiData(); // <-- Add this line
   ButtonCheck();
+  //Serial.println(motor_armed);  // Print entire message
+
   ParametersRead();
+
   if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2))
   {
     digitalWrite(LED_BUILTIN, HIGH);
@@ -99,8 +127,9 @@ void loop()
     // AccelPrint(2); // Print the accelerometer data
     //PredictedAnglePrint();
     
-
-    motor_control(50, 50, 50, 50);  // explicit float literals
+    
+    MotorWrite(motor_armed, motor1_percent, motor2_percent, motor3_percent, motor4_percent); // Control motors based on input percentages
+    //Serial.println(motor1_percent);
     if (pb_falling)
     {
       buzzing(5);

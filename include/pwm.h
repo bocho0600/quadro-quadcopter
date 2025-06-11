@@ -18,4 +18,7 @@ void pwm_init();
 void motor_control(float percent1, float percent2, float percent3, float percent4);
 void buzzing(uint8_t type);
 void ButtonCheck();
+void MotorWrite(bool armed, float percent1, float percent2, float percent3, float percent4);
+void MotorConnect(bool activate);
+
 #endif
