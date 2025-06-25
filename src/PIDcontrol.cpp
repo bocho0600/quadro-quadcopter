@@ -10,6 +10,7 @@
 /* PID control parameters */
 float DesiredRateRoll, DesiredRatePitch, DesiredRateYaw;
 
+
 float ErrorRateRoll, ErrorRatePitch, ErrorRateYaw;
 float InputRoll, InputThrottle, InputPitch, InputYaw;
 float PrevErrorRateRoll, PrevErrorRatePitch, PrevErrorRateYaw;
