@@ -18,22 +18,44 @@ uint32_t LoopTimer = 0;
 #define RXD2 16  // Serial2 RX (connects to Pi TX)
 #define TXD2 17  // Serial2 TX (connects to Pi RX)
 
+#define THROTTLE_PIN 33  // CH3 from HotRC receiver (Throttle)
+
+volatile unsigned long throttleRise = 0;
+volatile uint16_t throttlePulse = 1000;
+
+volatile unsigned long throttleRiseTime = 0;
+volatile uint16_t throttlePulseWidth = 1000;  // Default to minimum
+
+// Interrupt handler for throttle pin
+void IRAM_ATTR throttleInterrupt() {
+  if (digitalRead(THROTTLE_PIN)) {
+    throttleRiseTime = micros();
+  } else {
+    throttlePulseWidth = micros() - throttleRiseTime;
+  }
+}
+
 void setup()
 {
-  Serial.begin(230400);
+  Serial.begin(115200);
   Serial2.begin(230400, SERIAL_8N1, RXD2, TXD2); // UART for Raspberry Pi communication
+
   delay(250);  // Wait for the MPU9250 to power up
   MPU_setup(); // Setup the MPU , calibrate the gyroscope, let the ByPo stable in the first 2 seconds to measure the average value
   pwm_init();  // Initialize PWM for motors and buzzer
+
   pinMode(BUTTON_PIN, INPUT);
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+
+  // Setup throttle pin interrupt
+  pinMode(THROTTLE_PIN, INPUT);
+  // attachInterrupt(digitalPinToInterrupt(THROTTLE_PIN), throttleInterrupt, CHANGE);
 }
 
 void ParametersRead()
 {
-  //Serial.println(); // reset the line
   GyroRead();       // Read the gyroscope data
   AccelRead();      // Read the accelerometer data
   KalmanFilter();   // Kalman filter for the accelerometer data
@@ -44,7 +66,6 @@ float motor1_percent = 0;
 float motor2_percent = 0;
 float motor3_percent = 0;
 float motor4_percent = 0;
-
 
 String uartBuffer = "";
 
@@ -57,7 +78,6 @@ void readPiData() {
       uartBuffer += c;
     } else if (c == '>') {
       uartBuffer += c;
-      // Serial.println(uartBuffer);  // Print entire message
 
       // Parse if message starts with <MOT,
       if (uartBuffer.startsWith("<MOT,")) {
@@ -84,65 +104,65 @@ void readPiData() {
   }
 }
 
-
 void loop()
 {
-  Serial2.print("<TEL," + String(KalmanAngleRoll, 2) + "," + String(KalmanAnglePitch, 2) + ">");
-  readPiData(); // <-- Add this line
-  ButtonCheck();
-  //Serial.println(motor_armed);  // Print entire message
+    //  InputThrottle = pulseIn(THROTTLE_PIN, HIGH, 25000); // 25ms timeout
+    // float throttlePercent = map(rawThrottle, 1000, 2000, 0, 100);
+    // throttlePercent = constrain(throttlePercent, 0, 100);
+    // Serial.println(InputThrottle);
 
+  Serial2.print("<TEL," + String(KalmanAngleRoll, 2) + "," + String(KalmanAnglePitch, 2) + ">");
+  readPiData();
+  ButtonCheck();
   ParametersRead();
 
-  if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2))
-  {
+  // Debug LED if rates exceed limits
+  if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2)) {
     digitalWrite(LED_BUILTIN, HIGH);
-  }
-  else
-  {
+  } else {
     digitalWrite(LED_BUILTIN, LOW);
   }
-  // Serial.print(pb_falling);
+
   switch (state)
   {
-  case CALIBRATION:
-    buzzing(1); // Short beeps to indicate that the calibration is done
-    digitalWrite(LED2, HIGH);
-    state = READY;
-    break;
-  case READY:
-    if (pb_falling)
+    case CALIBRATION:
+      buzzing(1); // Short beeps to indicate that the calibration is done
+      digitalWrite(LED2, HIGH);
+      state = READY;
+      break;
+
+    case READY:
+      if (pb_falling)
+      {
+        buzzing(5);
+        digitalWrite(LED2, LOW);  // Turn off RED LED
+        digitalWrite(LED1, HIGH); // Turn on Blue LED
+        state = RUN;
+      }
+      break;
+
+    case RUN:
     {
-      buzzing(5);
-      digitalWrite(LED2, LOW);  // Turn off RED LED
-      digitalWrite(LED1, HIGH); // Turn on Blue LED
-      //motor_control(1000, 1000, 1000, 1000);
-      state = RUN;
+      // Get throttle from PWM (CH3)
+      InputThrottle = pulseIn(THROTTLE_PIN, HIGH); 
+      // Serial.println(InputThrottle);
+      PredictedAnglePrint(); // Print the predicted angles
+
+      MotorWrite(motor_armed, motor1_percent, motor2_percent, motor3_percent, motor4_percent);
+
+      if (pb_falling)
+      {
+        buzzing(5);
+        digitalWrite(LED1, LOW);
+        digitalWrite(LED2, HIGH);
+        state = EMERGENCY;
+      }
+      break;
     }
 
-    break;
-  case RUN:
-
-    // GyroPrint();      // Print the gyroscope data
-    // AccelPrint(2); // Print the accelerometer data
-    //PredictedAnglePrint();
-    
-    
-    MotorWrite(motor_armed, motor1_percent, motor2_percent, motor3_percent, motor4_percent); // Control motors based on input percentages
-    //Serial.println(motor1_percent);
-    if (pb_falling)
-    {
-      buzzing(5);
-      digitalWrite(LED1, LOW);  // Turn off RED LED
-      digitalWrite(LED2, HIGH); // Turn on Blue LED
-     // motor_control(1000, 1000, 1000, 1000);
-      state = EMERGENCY;
-    }
-    break;
-  case EMERGENCY:
-    //motor_control(2000, 2000, 2000, 2000); // 50% speed
-    buzzing(4);
-    break;
-    delay(1);
+    case EMERGENCY:
+      buzzing(4);
+      break;
+      delay(1);
   }
 }

@@ -20,6 +20,7 @@ float PRateRoll = 0.6, PRatePitch = 0.6, PRateYaw = 2;
 float IRateRoll = 3.5, IRatePitch = 3.5, IRateYaw = 12;
 float DRateRoll = 0.03, DRatePitch = 0.03, DRateYaw = 0;
 float MotorInput1, MotorInput2, MotorInput3, MotorInput4;
+
 float Ts = 0.004;
 void pid_equation(float Error, float P, float I, float D, float PrevError, float PrevIterm)
 {
@@ -39,6 +40,7 @@ void pid_equation(float Error, float P, float I, float D, float PrevError, float
       PIDReturn[1] = Error;
       PIDReturn[2] = Iterm;
 }
+
 void PIDReset()
 {
       PrevErrorRateRoll = 0;
