@@ -18,7 +18,7 @@ Yaw - rotation around Z-axis (counter-clockwise is positive)
 State state = CALIBRATION;
 int RateCalibrationNumber = 0;                                       // Number of calibration data
 float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw; // Calibration data
-float RateRoll, RatePitch, RateYaw;                                  // Gyroscope data
+float RateRoll, RatePitch, RateYaw, temp;                                  // Gyroscope data
 
 void MPU9250_LOWPASS() // Activate Low-pass filter to limit the rate of noise
 {
@@ -50,6 +50,9 @@ void GyroResponse()
     RateRoll = (float)GyroX / 65.5;                        // Convert the data to degrees per second from 65.5 LSB/s
     RatePitch = (float)GyroY / 65.5;
     RateYaw = (float)GyroZ / 65.5;
+    // temp = RateRoll;
+    // RatePitch = temp;
+    // RateRoll = RatePitch; // Set RateRoll to RatePitch for testing purposes
   }
 }
 
@@ -104,9 +107,9 @@ void MPU_setup()
 
 void GyroPrint()
 {
-  Serial.print(" X: ");
+  Serial.print(" RateRoll: ");
   Serial.print(RateRoll);
-  Serial.print(" Y: ");
+  Serial.print(" RatePitch: ");
   Serial.print(RatePitch);
   Serial.print(" Z: ");
   Serial.println(RateYaw);

@@ -3,7 +3,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 #include <stdint.h>
-
+#define THROTTLE_PIN 33  // CH3 from HotRC receiver (Throttle)
 extern float ErrorRateRoll, ErrorRatePitch, ErrorRateYaw;
 extern float InputRoll, InputThrottle, InputPitch, InputYaw;
 extern float PrevErrorRateRoll, PrevErrorRatePitch, PrevErrorRateYaw;
@@ -18,6 +18,6 @@ void pid_equation(float Error, float P, float I, float D, float PrevError, float
 void PIDReset();
 void ControllerRead();
 void PID_Execution();
-void MotorInput();
+void MotorInput(bool armed);
 
 #endif

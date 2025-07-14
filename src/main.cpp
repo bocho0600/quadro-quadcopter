@@ -12,13 +12,13 @@ Contact:
 #include "AngleInit.h"
 #include "AccelInit.h"
 #include "PIDcontrol.h"
-
+#include "controller.h"
 uint32_t LoopTimer = 0;
 // Constants
 #define RXD2 16  // Serial2 RX (connects to Pi TX)
 #define TXD2 17  // Serial2 TX (connects to Pi RX)
+#define ARM_PIN 32 // Pin to read the arm state
 
-#define THROTTLE_PIN 33  // CH3 from HotRC receiver (Throttle)
 
 volatile unsigned long throttleRise = 0;
 volatile uint16_t throttlePulse = 1000;
@@ -51,6 +51,7 @@ void setup()
 
   // Setup throttle pin interrupt
   pinMode(THROTTLE_PIN, INPUT);
+  pinMode(ARM_PIN, INPUT); // Arm pin with pull-up resistor
   // attachInterrupt(digitalPinToInterrupt(THROTTLE_PIN), throttleInterrupt, CHANGE);
 }
 
@@ -68,6 +69,7 @@ float motor3_percent = 0;
 float motor4_percent = 0;
 
 String uartBuffer = "";
+float input_arm = 0;
 
 void readPiData() {
   while (Serial2.available()) {
@@ -104,17 +106,18 @@ void readPiData() {
   }
 }
 
+
+
 void loop()
 {
-    //  InputThrottle = pulseIn(THROTTLE_PIN, HIGH, 25000); // 25ms timeout
-    // float throttlePercent = map(rawThrottle, 1000, 2000, 0, 100);
-    // throttlePercent = constrain(throttlePercent, 0, 100);
-    // Serial.println(InputThrottle);
 
   Serial2.print("<TEL," + String(KalmanAngleRoll, 2) + "," + String(KalmanAnglePitch, 2) + ">");
   readPiData();
   ButtonCheck();
   ParametersRead();
+  ControllerRead();   // Update desired rates and errors
+
+  motor_armed = ArmRead(); // Read the arm state
 
   // Debug LED if rates exceed limits
   if ((RatePitch < -2) || (RatePitch > 2) || (RateRoll < -2) || (RateRoll > 2) || (RateYaw < -2) || (RateYaw > 2)) {
@@ -132,23 +135,29 @@ void loop()
       break;
 
     case READY:
+      Serial.print("Arm State: ");
+      Serial.println(motor_armed);
       if (pb_falling)
       {
         buzzing(5);
         digitalWrite(LED2, LOW);  // Turn off RED LED
         digitalWrite(LED1, HIGH); // Turn on Blue LED
+        PIDReset();
+        MotorConnect(1);
         state = RUN;
+        
       }
       break;
 
     case RUN:
     {
       // Get throttle from PWM (CH3)
-      InputThrottle = pulseIn(THROTTLE_PIN, HIGH); 
+      
       // Serial.println(InputThrottle);
-      PredictedAnglePrint(); // Print the predicted angles
+      // GyroPrint(); // Print the predicted angles
 
-      MotorWrite(motor_armed, motor1_percent, motor2_percent, motor3_percent, motor4_percent);
+      PID_Execution();    // Run the PID controller, updates InputRoll, InputPitch, InputYaw, InputThrottle
+      MotorInput(motor_armed);       // Calculate motor outputs based on PID results
 
       if (pb_falling)
       {

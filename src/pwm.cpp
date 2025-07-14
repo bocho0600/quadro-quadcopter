@@ -60,6 +60,43 @@ void motor_control(float percent1, float percent2, float percent3, float percent
       esc3.writeMicroseconds(pwm3);
       esc4.writeMicroseconds(pwm4);
 }
+void motor_control1(float speed1, float speed2, float speed3, float speed4)
+{
+      esc1.writeMicroseconds(speed1);
+      esc2.writeMicroseconds(speed2);
+      esc3.writeMicroseconds(speed3);
+      esc4.writeMicroseconds(speed4);
+}
+
+
+void ControlMotor(bool armed, float speed1, float speed2, float speed3, float speed4)
+{
+      // Send PWM signals to ESCs
+      static bool prev_armed = armed; // Store previous armed state
+      if (armed != prev_armed) // if the armed state has changed
+      {
+            if (armed)
+            {
+                  MotorConnect(true); // Connect motors when armed
+            }
+            else
+            {
+                  MotorConnect(false); // Disconnect motors when disarmed
+            }
+      }
+      prev_armed = armed; // Store previous armed state
+      if (!armed)
+      {     
+            speed1 = 0; // Stop motors if not armed
+            speed2 = 0;
+            speed3 = 0;
+            speed4 = 0;
+      }
+
+      // motor_control1( speed1, speed2, speed3, speed4); // Control motors based on input percentages
+}
+
+
 
 void MotorConnect(bool activate)
 {
@@ -69,7 +106,8 @@ void MotorConnect(bool activate)
             esc2.attach(ESC_PIN2);
             esc3.attach(ESC_PIN3);
             esc4.attach(ESC_PIN4);
-            Serial.println("Motors armed.");
+            Serial.println("Motors armed!");
+            
       }
       else
       {
@@ -80,6 +118,7 @@ void MotorConnect(bool activate)
             Serial.println("Motors disarmed.");
       }
       // Attach ESCs to start sending signals
+      delay(1000); // Wait for ESCs to initialize
 }
 
 void MotorWrite(bool armed, float percent1, float percent2, float percent3, float percent4)

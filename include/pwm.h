@@ -20,5 +20,5 @@ void buzzing(uint8_t type);
 void ButtonCheck();
 void MotorWrite(bool armed, float percent1, float percent2, float percent3, float percent4);
 void MotorConnect(bool activate);
-
+void motor_control1(float speed1, float speed2, float speed3, float speed4);
 #endif
